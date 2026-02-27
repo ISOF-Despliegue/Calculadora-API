@@ -116,3 +116,73 @@ app.delete('/calculadora/historial/:id', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en puerto ${PORT}`);
 });
+
+// POST: Guardar operación automática en el historial 
+app.post('/calculadora/operar', (req, res) => {
+  const { operacion, a, b } = req.body;
+
+  if (!operacion || a === undefined || b === undefined) {
+    return res.status(400).json({ error: 'Faltan datos' });
+  }
+
+  let resultado;
+
+  switch (operacion) {
+    case 'sumar':
+      resultado = Number(a) + Number(b);
+      break;
+    case 'restar':
+      resultado = Number(a) - Number(b);
+      break;
+    case 'multiplicar':
+      resultado = Number(a) * Number(b);
+      break;
+    case 'dividir':
+      resultado = b != 0 ? Number(a) / Number(b) : "No se puede dividir entre cero";
+      break;
+    default:
+      return res.status(400).json({ error: 'Operación no válida' });
+  }
+
+  const nuevoRegistro = { id: idCounter++, operacion, a, b, resultado };
+  historial.push(nuevoRegistro);
+
+  res.status(201).json({ mensaje: 'Operación realizada y guardada', registro: nuevoRegistro });
+});
+
+
+// PUT: Reemplazar completamente todo el historial 
+app.put('/calculadora/historial', (req, res) => {
+  if (!Array.isArray(req.body)) {
+    return res.status(400).json({ error: 'Se requiere un arreglo completo de registros' });
+  }
+
+  historial = req.body;
+  idCounter = historial.length + 1;
+
+  res.json({ mensaje: 'Historial reemplazado completamente', historial });
+});
+
+
+// PATCH: Marcar un registro como revisado por su ID 
+app.patch('/calculadora/historial/:id/revisar', (req, res) => {
+  const idBuscado = parseInt(req.params.id);
+  const index = historial.findIndex(item => item.id === idBuscado);
+
+  if (index === -1) {
+    return res.status(404).json({ error: 'Registro no encontrado' });
+  }
+
+  historial[index] = { ...historial[index], revisado: true };
+
+  res.json({ mensaje: 'Registro marcado como revisado', registro: historial[index] });
+});
+
+
+// DELETE: Eliminar todo el historial 
+app.delete('/calculadora/historial', (req, res) => {
+  historial = [];
+  idCounter = 1;
+
+  res.json({ mensaje: 'Todo el historial fue eliminado' });
+});
