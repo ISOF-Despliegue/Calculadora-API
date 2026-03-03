@@ -1,4 +1,2 @@
 # Despliegue de Software #
-- Leonardo Ortega
-- Carlos Castillo
-- Abel Yong
+Esta aplicación expone una API para realizar operaciones básicas y guardar el historial de operaciones realizadas
