@@ -4,42 +4,13 @@ const express = require('express');
 const app = express();
 
 const PORT = process.env.PORT;
+const cors = require('cors');
 
 app.use(express.json());
+app.use(cors());
 
 app.get('/calculadora', (req, res) => {
   res.send('Servidor funcionando correctamente');
-});
-
-app.get('/calculadora/sumar', (req, res) => {
-  const { a, b } = req.query;
-  const resultado = Number(a) + Number(b);
-  res.json({ resultado });
-});
-
-app.get('/calculadora/restar', (req, res) => {
-  const { a, b } = req.query;
-  const resultado = Number(a) - Number(b);
-  res.json({ resultado });
-});
-
-app.get('/calculadora/multiplicar', (req, res) => {
-  const { a, b } = req.query;
-  const resultado = Number(a) * Number(b);
-  res.json({ resultado });
-});
-
-app.get('/calculadora/dividir', (req, res) => {
-  const { a, b } = req.query;
-  let resultado;
-  
-  if ( b != 0) {
-    resultado = Number(a) / Number(b);
-  } else {
-    resultado = "No se puede dividir entre cero";
-  }
-
-  res.json({ resultado });
 });
 
 // Base de datos simulada en memoria
@@ -113,10 +84,6 @@ app.delete('/calculadora/historial/:id', (req, res) => {
   res.json({ mensaje: 'Registro eliminado', registro: registroEliminado[0] });
 });
 
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en puerto ${PORT}`);
-});
-
 // POST: Guardar operación automática en el historial 
 app.post('/calculadora/operar', (req, res) => {
   const { operacion, a, b } = req.body;
@@ -185,4 +152,8 @@ app.delete('/calculadora/historial', (req, res) => {
   idCounter = 1;
 
   res.json({ mensaje: 'Todo el historial fue eliminado' });
+});
+
+app.listen(PORT, () => {
+  console.log(`Servidor corriendo en puerto ${PORT}`);
 });
