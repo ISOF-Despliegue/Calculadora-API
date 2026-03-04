@@ -1,10 +1,12 @@
 require('dotenv').config();
 
 const express = require('express');
+const cors = require('cors');
 const app = express();
 
 const PORT = process.env.PORT;
 
+app.use(cors());
 app.use(express.json());
 
 app.get('/calculadora', (req, res) => {
@@ -51,12 +53,46 @@ app.get('/calculadora/historial', (req, res) => {
   res.json(historial);
 });
 
-// POST: Crear un nuevo registro en el historial
-app.post('/calculadora/historial', (req, res) => {
-  const { operacion, a, b, resultado } = req.body;
+// GET: Obtener un registro específico por ID
+app.get('/calculadora/historial/:id', (req, res) => {
+  const idBuscado = parseInt(req.params.id);
+  const registro = historial.find(item => item.id === idBuscado);
 
-  if (!operacion || a === undefined || b === undefined || resultado === undefined) {
-    return res.status(400).json({ error: 'Faltan datos en el cuerpo de la petición' });
+  if (!registro) {
+    return res.status(404).json({ error: 'Registro no encontrado' });
+  }
+
+  res.json(registro);
+});
+
+// POST: Realizar operación y guardar en historial
+app.post('/calculadora/operar', (req, res) => {
+  const { operacion, a, b } = req.body;
+
+  if (!operacion || a === undefined || b === undefined) {
+    return res.status(400).json({ error: 'Faltan datos' });
+  }
+
+  let resultado;
+
+  switch (operacion) {
+    case 'sumar':
+      resultado = Number(a) + Number(b);
+      break;
+    case 'restar':
+      resultado = Number(a) - Number(b);
+      break;
+    case 'multiplicar':
+      resultado = Number(a) * Number(b);
+      break;
+    case 'dividir':
+      if (b === 0) {
+        return res.status(400).json({ error: 'No se puede dividir entre cero' });
+      }
+      resultado = Number(a) / Number(b);
+      break;
+    default:
+      return res.status(400).json({ error: 'Operación no válida' });
   }
 
   const nuevoRegistro = { id: idCounter++, operacion, a, b, resultado };
